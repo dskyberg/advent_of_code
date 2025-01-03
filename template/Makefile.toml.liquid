@@ -50,3 +50,8 @@ args = [
 
 [tasks.build]
 dependencies= ["add-crates", "add-aoc-utils"]
+
+[tasks.post-build]
+dependencies = ["build"]
+command = "zed"
+args = ["-n", "."]

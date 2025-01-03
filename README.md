@@ -28,10 +28,10 @@ Now simply use `cargo-make` to generate the new day
 cargo make next-day
 ```
 
-This will execute a python script to figure out what the next day is, and create a couple
-temporary files as input to the next set of processes.
-
-`cargo generate` will then be called using the files in the `template` folder to create
-the new rust app for the day.
-
-`aoc` will then be used to get the puzzle input for the new day
+The `next-day` task will do several things.
+- Leverage `cargo-generate` to copy the `template` folder to the new day
+- Leverage  `aoc-cli` to pull down the day's puzzle input
+- Run some python code to create the src/lib.rs file, which will contain the input as static text
+- Leverage `cargo-make` to add common crates and do a test build
+- Clean up temp files
+- Lauch the Zed editor for both the `aoc_utils` and new day projects.
