@@ -55,21 +55,21 @@ args = [
 dependencies=["generate-next-day-project"]
 cwd = "${CARGO_MAKE_WORKING_DIRECTORY}/${CARGO_GENERATE_VALUE_PROJECT_NAME}"
 command = "cargo"
-args = ["make", "build"]
+args = ["make", "post-build"]
 
 
 [tasks.cleanup]
 condition = {files_exist = [
     "temp.toml",
     "project_name.txt",
-
     ]}
-
 script = [
         "rm -f temp.toml",
        "rm -f project_name.txt",
-        "rm -f ${CARGO_GENERATE_VALUE_PROJECT_NAME}/Makefile.toml"]
+        "rm -f ${CARGO_GENERATE_VALUE_PROJECT_NAME}/Makefile.toml",
+        "cd ../aoc_utils",
+        "zed -n ."
+        ]
 
 [tasks.next-day]
-dependencies = ["build-day"]
-run_task = "cleanup"
+run_task = {name = "build-day",fork=true, cleanup_task="cleanup"}
