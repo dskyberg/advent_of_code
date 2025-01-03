@@ -1,0 +1,52 @@
+{% assign day = crate_name | split: "_" %}
+{% assign day_digit = day[1] %}
+
+[tasks.get-puzzle-input]
+command = "aoc"
+args = [
+    "download",
+    "-I",
+    "-o",
+    "-y",
+    "{{YEAR}}",
+    "-d",
+    "{{ day_digit }}"
+]
+
+[tasks.generate-lib]
+condition = {files_exist = ["${CARGO_MAKE_WORKING_DIRECTORY}/input"]}
+script = '''
+#!/usr/bin/env python3
+import os
+with open("input", "r") as f:
+    input = f.readlines()
+
+with open("src/lib.rs", "w") as f:
+    f.write("pub static INPUT:&str = r#\"")
+    for line in input:
+        f.write(line)
+    f.write("\"#;")
+os.remove("input")
+'''
+dependencies = ["get-puzzle-input"]
+
+[tasks.add-crates]
+command = "cargo"
+args = [
+    "add",
+    "anyhow",
+    "thiserror"
+]
+dependencies = ["generate-lib"]
+
+[tasks.add-aoc-utils]
+command = "cargo"
+args = [
+    "add",
+    "aoc_utils",
+    "--path",
+    "../../aoc_utils"
+]
+
+[tasks.build]
+dependencies= ["add-crates", "add-aoc-utils"]

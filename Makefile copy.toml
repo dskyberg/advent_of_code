@@ -1,0 +1,75 @@
+[env]
+YEAR = "2025"
+
+[config]
+skip_core_tasks = true
+
+[tasks.get-day]
+script = '''
+#!/usr/bin/env python3
+import os
+import sys
+
+last_day = 0
+for dir in os.listdir("."):
+    if dir.startswith("day_"):
+        day = int(dir.split("_",1)[1])
+        if day >= 25:
+            eprint("You're done!", file=sys.stderr)
+            exit(1)
+        if day > last_day:
+            last_day = day
+day = str(last_day + 1)
+year = os.getenv("YEAR")
+
+with open("temp.toml","w") as f:
+    f.write("[values]\n")
+    f.write("YEAR = \"" + year + "\"\n")
+    f.write("DAY = \"" + day + "\"\n")
+with open("project_name.txt","w") as f:
+    f.write("day_" + day)
+'''
+
+[tasks.create-day-and-project-name]
+condition = {files_exist = [
+    "${CARGO_MAKE_WORKING_DIRECTORY}/project_name.txt"
+    ]}
+env = {"CARGO_GENERATE_VALUE_PROJECT_NAME" = {script = ["DAY=$(cat ./project_name.txt)",  "echo ${DAY}"]}}
+
+
+[tasks.generate-next-day-project]
+dependencies = ["get-day", "create-day-and-project-name"]
+condition = {files_exist = [
+    "${CARGO_MAKE_WORKING_DIRECTORY}/temp.toml",
+    "${CARGO_MAKE_WORKING_DIRECTORY}/project_name.txt"
+    ]}
+command = "cargo"
+args = [
+    "gen",
+    "--allow-commands",
+    "--values-file", "temp.toml",
+    "--path", "../template"
+]
+
+[tasks.build-day]
+dependencies=["generate-next-day-project"]
+cwd = "${CARGO_MAKE_WORKING_DIRECTORY}/${CARGO_GENERATE_VALUE_PROJECT_NAME}"
+command = "cargo"
+args = ["make", "build"]
+
+
+[tasks.cleanup]
+condition = {files_exist = [
+    "temp.toml",
+    "project_name.txt",
+
+    ]}
+
+script = [
+        "rm -f temp.toml",
+       "rm -f project_name.txt",
+        "rm -f ${CARGO_GENERATE_VALUE_PROJECT_NAME}/Makefile.toml"]
+
+[tasks.next-day]
+dependencies = ["build-day"]
+run_task = "cleanup"
