@@ -1,5 +1,5 @@
 [env]
-YEAR = "2024"
+YEAR = "2025"
 
 [config]
 skip_core_tasks = true
@@ -62,15 +62,14 @@ args = ["make", "build"]
 condition = {files_exist = [
     "temp.toml",
     "project_name.txt",
+
     ]}
+
 script = [
         "rm -f temp.toml",
        "rm -f project_name.txt",
-       "rm -f ${CARGO_GENERATE_VALUE_PROJECT_NAME}/Makefile.toml",
-        "zed -n ../aoc_utils",
-        "zed -n ${CARGO_GENERATE_VALUE_PROJECT_NAME}"
-        ]
+        "rm -f ${CARGO_GENERATE_VALUE_PROJECT_NAME}/Makefile.toml"]
 
 [tasks.next-day]
 dependencies = ["build-day"]
-run_task = {name = "cleanup"}
+run_task = "cleanup"
