@@ -21,8 +21,8 @@ static NEIGHBORS: [Point; 8] = [
 
 #[derive(Debug, PartialEq, Clone, Copy, Hash, Eq, Default)]
 pub struct Point {
-    pub y: isize,
     pub x: isize,
+    pub y: isize,
 }
 
 impl Point {
@@ -128,8 +128,8 @@ impl Point {
 impl From<(usize, usize)> for Point {
     fn from(value: (usize, usize)) -> Self {
         Self {
-            y: value.0 as isize,
-            x: value.1 as isize,
+            x: value.0 as isize,
+            y: value.1 as isize,
         }
     }
 }

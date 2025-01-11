@@ -8,6 +8,8 @@ pub enum ConvertError {
     Failed(char),
     #[error("Failed to convert from string")]
     NumberFromStr,
+    #[error("Failed to parse data to type T")]
+    TryFromFailed,
 }
 
 /// Convert from char to numeric type T (such as u8, u32, etc).
@@ -72,14 +74,18 @@ pub fn data_to_ascii_bytes(data: &str) -> Vec<Vec<u8>> {
     data.lines().map(line_to_ascii_bytes).collect()
 }
 
-pub fn grid_line<T: std::convert::From<char>>(line: &str) -> Vec<T> {
-    line.chars().map(|c| T::from(c)).collect()
+pub fn data_to_grid<T: std::convert::TryFrom<char>>(data: &str) -> Result<Vec<Vec<T>>> {
+    data.lines()
+        .map(|c| {
+            c.chars()
+                .map(|c| T::try_from(c))
+                .collect::<Vec<Result<T, _>>>()
+                .into_iter()
+                .collect::<Result<Vec<T>, _>>()
+        })
+        .collect::<Result<Vec<Vec<T>>, _>>()
+        .map_err(|_| ConvertError::TryFromFailed.into())
 }
-/// Convert data input into type T
-pub fn data_to_grid<T: std::convert::From<char>>(data: &str) -> Vec<Vec<T>> {
-    data.lines().map(grid_line).collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -101,5 +107,32 @@ mod tests {
     fn test_line_to_numbers() {
         let line = "  1    2 3";
         assert_eq!(vec![1, 2, 3], line_to_numbers(line, ' ').expect("oops"));
+    }
+
+    #[test]
+    fn test_data_to_u8_grid() {
+        let input = "....\n....\n....\n....";
+        let grid = vec![vec![b'.'; 4]; 4];
+        let result = data_to_grid::<u8>(input);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), grid);
+    }
+
+    #[test]
+    fn test_data_to_char_grid() {
+        let input = "....\n....\n....\n....";
+        let grid = vec![vec!['.'; 4]; 4];
+        let result = data_to_grid::<char>(input);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), grid);
+    }
+
+    #[test]
+    fn test_data_to_i32_grid() {
+        let input = "....\n....\n....\n....";
+        let grid = vec![vec![46; 4]; 4];
+        let result = data_to_grid::<u32>(input);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), grid);
     }
 }
