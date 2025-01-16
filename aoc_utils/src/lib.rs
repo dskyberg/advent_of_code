@@ -1,4 +1,5 @@
 #![feature(pattern)]
+#![feature(trait_alias)]
 
 pub mod aoc;
 pub mod convert;
