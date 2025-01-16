@@ -4,6 +4,18 @@ YEAR = "2024"
 [config]
 skip_core_tasks = true
 
+[tasks.clean-days]
+script = '''
+#!/usr/bin/env python3
+import os
+import sys
+import subprocess
+
+for dir in os.listdir("."):
+    if dir.startswith("day_"):
+        subprocess.run(["cargo", "clean"],  cwd=dir )
+'''
+
 [tasks.get-day]
 script = '''
 #!/usr/bin/env python3
@@ -64,12 +76,12 @@ condition = {files_exist = [
     "project_name.txt",
     ]}
 script = [
-        "rm -f temp.toml",
-       "rm -f project_name.txt",
-       "rm -f ${CARGO_GENERATE_VALUE_PROJECT_NAME}/Makefile.toml",
-        "zed -n ../aoc_utils",
-        "zed -n ${CARGO_GENERATE_VALUE_PROJECT_NAME}"
-        ]
+    "rm -f temp.toml",
+    "rm -f project_name.txt",
+    "rm -f ${CARGO_GENERATE_VALUE_PROJECT_NAME}/Makefile.toml",
+    "zed -n ../aoc_utils",
+    "zed -n ${CARGO_GENERATE_VALUE_PROJECT_NAME}"
+    ]
 
 [tasks.next-day]
 dependencies = ["build-day"]
