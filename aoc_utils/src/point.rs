@@ -134,6 +134,50 @@ impl From<(usize, usize)> for Point {
     }
 }
 
+impl From<(isize, isize)> for Point {
+    fn from(value: (isize, isize)) -> Self {
+        Self {
+            x: value.0,
+            y: value.1,
+        }
+    }
+}
+impl From<(u64, u64)> for Point {
+    fn from(value: (u64, u64)) -> Self {
+        Self {
+            x: value.0 as isize,
+            y: value.1 as isize,
+        }
+    }
+}
+
+impl From<(i64, i64)> for Point {
+    fn from(value: (i64, i64)) -> Self {
+        Self {
+            x: value.0 as isize,
+            y: value.1 as isize,
+        }
+    }
+}
+
+impl From<(u32, u32)> for Point {
+    fn from(value: (u32, u32)) -> Self {
+        Self {
+            x: value.0 as isize,
+            y: value.1 as isize,
+        }
+    }
+}
+
+impl From<(i32, i32)> for Point {
+    fn from(value: (i32, i32)) -> Self {
+        Self {
+            x: value.0 as isize,
+            y: value.1 as isize,
+        }
+    }
+}
+
 impl Display for Point {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "[{},{}]", self.y, self.x)
