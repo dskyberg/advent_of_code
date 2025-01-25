@@ -1,6 +1,8 @@
 use std::fmt::Display;
 use std::ops::{Add, AddAssign, Rem, Sub, SubAssign};
 
+use crate::Direction;
+
 static NEIGHBORS_HV: [Point; 4] = [
     Point { y: -1, x: 0 },
     Point { y: 0, x: -1 },
@@ -123,6 +125,43 @@ impl Point {
     pub fn south_west(&self) -> Point {
         *self + Self { y: 1, x: -1 }
     }
+
+    pub fn move_to(&self, d: Direction) -> Point {
+        match d {
+            Direction::North => Point {
+                x: self.x,
+                y: self.y - 1,
+            },
+            Direction::NorthEast => Point {
+                x: self.x + 1,
+                y: self.y - 1,
+            },
+            Direction::East => Point {
+                x: self.x + 1,
+                y: self.y,
+            },
+            Direction::SouthEast => Point {
+                x: self.x + 1,
+                y: self.y + 1,
+            },
+            Direction::South => Point {
+                x: self.x,
+                y: self.y + 1,
+            },
+            Direction::SouthWest => Point {
+                x: self.x - 1,
+                y: self.y + 1,
+            },
+            Direction::West => Point {
+                x: self.x - 1,
+                y: self.y,
+            },
+            Direction::NorthWest => Point {
+                x: self.x - 1,
+                y: self.y - 1,
+            },
+        }
+    }
 }
 
 impl From<(usize, usize)> for Point {
@@ -180,7 +219,7 @@ impl From<(i32, i32)> for Point {
 
 impl Display for Point {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[{},{}]", self.y, self.x)
+        write!(f, "[{},{}]", self.x, self.y)
     }
 }
 

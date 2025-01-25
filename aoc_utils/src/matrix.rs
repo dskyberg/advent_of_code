@@ -6,7 +6,7 @@ use thiserror::Error;
 
 use crate::{Point, data_to_grid};
 
-pub trait ItemTrait = TryFrom<char> + Copy + Display;
+pub trait ItemTrait = TryFrom<char> + Copy + Display + PartialEq;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Error)]
 pub enum MatrixError {
@@ -14,6 +14,8 @@ pub enum MatrixError {
     FailedToParse,
     #[error("Point is out of range: {0}:{1} ")]
     OutOfRange(isize, isize),
+    #[error("Cannot create a matrixfrom empty vec")]
+    EmptyVec,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -39,22 +41,31 @@ impl<T: ItemTrait> Matrix<T> {
             && point.x < self.width as isize
     }
 
+    #[inline]
+    pub fn is_edge(&self, p: &Point) -> bool {
+        (p.x == 0 || p.x == self.width as isize - 1)
+            && (p.y == 0 || p.y == self.height as isize - 1)
+    }
+
     /// Gets a value at position `Point`. Returns Err if the position is not valid.
     #[inline]
     pub fn get(&self, point: &Point) -> Result<T> {
-        match self.valid_point(point) {
-            true => Ok(self[point.y as usize][point.x as usize]),
-            false => Err(MatrixError::OutOfRange(point.x, point.y).into()),
-        }
+        let x = *self
+            .grid
+            .get(point.y as usize)
+            .and_then(|row| row.get(point.x as usize))
+            .ok_or(MatrixError::OutOfRange(point.x, point.y))?;
+        Ok(x)
     }
 
     /// Gets a value at position `Point`. Panics if the position is not valid.
     #[inline]
     pub fn get_unsafe(&self, point: &Point) -> T {
-        match self.valid_point(point) {
-            true => self[point.y as usize][point.x as usize],
-            false => panic!("Out of range: [{}:{}]", point.x, point.y),
-        }
+        *self
+            .grid
+            .get(point.y as usize)
+            .and_then(|row| row.get(point.x as usize))
+            .unwrap()
     }
 
     /// Sets a value at position `Point`. Returns Err if the position is not valid.
@@ -62,7 +73,7 @@ impl<T: ItemTrait> Matrix<T> {
     pub fn set(&mut self, point: &Point, t: T) -> Result<()> {
         match self.valid_point(point) {
             true => {
-                self[point.y as usize][point.x as usize] = t;
+                self.set_unsafe(point, t);
                 Ok(())
             }
             false => Err(MatrixError::OutOfRange(point.x, point.y).into()),
@@ -72,11 +83,7 @@ impl<T: ItemTrait> Matrix<T> {
     /// Sets a value at position `Point`. Panics if the position is not valid.
     #[inline]
     pub fn set_unsafe(&mut self, point: &Point, t: T) {
-        match self.valid_point(point) {
-            true => self[point.y as usize][point.x as usize] = t,
-
-            false => panic!("Out of range: [{}:{}]", point.x, point.y),
-        };
+        self[point.y as usize][point.x as usize] = t;
     }
 
     /// Iterate the entire matrix.
@@ -102,6 +109,38 @@ impl<T: ItemTrait> Matrix<T> {
             y: (index / self.width) as isize,
         })
     }
+
+    pub fn find(&self, input: &T) -> Vec<Point> {
+        self.iter()
+            .filter(|(_, t)| t == input)
+            .map(|(p, _)| p)
+            .collect()
+    }
+
+    pub fn find_one(&self, input: &T) -> Option<Point> {
+        let results: Vec<Point> = self.find(input);
+        match results.is_empty() {
+            true => None,
+            false => Some(results[0]),
+        }
+    }
+
+    pub fn swap(&mut self, lhs: &Point, rhs: &Point) -> Result<()> {
+        if !self.valid_point(lhs) {
+            return Err(MatrixError::OutOfRange(lhs.x, lhs.y).into());
+        }
+        if !self.valid_point(rhs) {
+            return Err(MatrixError::OutOfRange(rhs.x, rhs.y).into());
+        }
+        self.swap_unsafe(lhs, rhs);
+        Ok(())
+    }
+
+    pub fn swap_unsafe(&mut self, lhs: &Point, rhs: &Point) {
+        let hold = self.get_unsafe(lhs);
+        self.set_unsafe(lhs, self.get_unsafe(rhs));
+        self.set_unsafe(rhs, hold);
+    }
 }
 
 impl<T: ItemTrait> TryFrom<&str> for Matrix<T> {
@@ -112,6 +151,24 @@ impl<T: ItemTrait> TryFrom<&str> for Matrix<T> {
 
         let height = grid.len();
         let width = grid[0].len();
+        Ok(Self {
+            grid,
+            height,
+            width,
+        })
+    }
+}
+
+impl<T: ItemTrait> TryFrom<Vec<Vec<T>>> for Matrix<T> {
+    type Error = MatrixError;
+
+    fn try_from(grid: Vec<Vec<T>>) -> Result<Self, Self::Error> {
+        let height = grid.len();
+        let width = grid[0].len();
+        if height == 0 || width == 0 {
+            return Err(MatrixError::EmptyVec);
+        }
+
         Ok(Self {
             grid,
             height,
