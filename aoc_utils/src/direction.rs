@@ -6,7 +6,7 @@ pub enum DirectionError {
     FromStr,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Default)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Default, Ord, PartialOrd)]
 pub enum Direction {
     #[default]
     North,

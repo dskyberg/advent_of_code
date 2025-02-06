@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use std::ops::{Add, AddAssign, Rem, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Mul, Rem, Sub, SubAssign};
 
 use crate::Direction;
 
@@ -21,20 +21,13 @@ static NEIGHBORS: [Point; 8] = [
     Point { y: 1, x: 1 },
 ];
 
-#[derive(Debug, PartialEq, Clone, Copy, Hash, Eq, Default)]
+#[derive(Debug, PartialEq, Ord, PartialOrd, Clone, Copy, Hash, Eq, Default)]
 pub struct Point {
     pub x: isize,
     pub y: isize,
 }
 
 impl Point {
-    pub fn mul(&self, factor: usize) -> Self {
-        Self {
-            y: self.y * factor as isize,
-            x: self.x * factor as isize,
-        }
-    }
-
     #[inline]
     /// Absolute distance between rows
     pub fn vertical_distance(&self, other: &Self) -> isize {
@@ -101,65 +94,59 @@ impl Point {
         }
     }
 
+    #[inline]
+    /// *self + Self { x: 0, y: -1 }
     pub fn north(&self) -> Point {
-        *self + Self { y: -1, x: 0 }
+        *self + Self { x: 0, y: -1 }
     }
-    pub fn east(&self) -> Point {
-        *self + Self { y: 0, x: 1 }
-    }
-    pub fn south(&self) -> Point {
-        *self + Self { y: 1, x: 0 }
-    }
-    pub fn west(&self) -> Point {
-        *self + Self { y: 0, x: -1 }
-    }
-    pub fn north_west(&self) -> Point {
-        *self + Self { y: -1, x: -1 }
-    }
+    #[inline]
+    /// *self + Self { x: 1, y: -1 }
     pub fn north_east(&self) -> Point {
-        *self + Self { y: -1, x: 1 }
+        *self + Self { x: 1, y: -1 }
     }
+    #[inline]
+    /// *self + Self { x: 1, y: 0 }
+    pub fn east(&self) -> Point {
+        *self + Self { x: 1, y: 0 }
+    }
+    #[inline]
+    /// *self + Self { x: 1, y: 1 }
     pub fn south_east(&self) -> Point {
-        *self + Self { y: 1, x: 1 }
+        *self + Self { x: 1, y: 1 }
     }
+    #[inline]
+    /// *self + Self { x: 0, y: 1 }
+    pub fn south(&self) -> Point {
+        *self + Self { x: 0, y: 1 }
+    }
+    #[inline]
+    /// *self + Self { x: -1, y: 1 }
     pub fn south_west(&self) -> Point {
-        *self + Self { y: 1, x: -1 }
+        *self + Self { x: -1, y: 1 }
+    }
+    #[inline]
+    ///  *self + Self { x: -1, y: 0 }
+    pub fn west(&self) -> Point {
+        *self + Self { x: -1, y: 0 }
     }
 
-    pub fn move_to(&self, d: Direction) -> Point {
-        match d {
-            Direction::North => Point {
-                x: self.x,
-                y: self.y - 1,
-            },
-            Direction::NorthEast => Point {
-                x: self.x + 1,
-                y: self.y - 1,
-            },
-            Direction::East => Point {
-                x: self.x + 1,
-                y: self.y,
-            },
-            Direction::SouthEast => Point {
-                x: self.x + 1,
-                y: self.y + 1,
-            },
-            Direction::South => Point {
-                x: self.x,
-                y: self.y + 1,
-            },
-            Direction::SouthWest => Point {
-                x: self.x - 1,
-                y: self.y + 1,
-            },
-            Direction::West => Point {
-                x: self.x - 1,
-                y: self.y,
-            },
-            Direction::NorthWest => Point {
-                x: self.x - 1,
-                y: self.y - 1,
-            },
+    #[inline]
+    /// *self + Self { x: -1, y: -1 }
+    pub fn north_west(&self) -> Point {
+        *self + Self { x: -1, y: -1 }
+    }
+
+    /// Returns the point in the provided direction
+    pub fn neighbor(&self, dir: Direction) -> Point {
+        match dir {
+            Direction::North => self.north(),
+            Direction::NorthEast => self.north_east(),
+            Direction::East => self.east(),
+            Direction::SouthEast => self.south_east(),
+            Direction::South => self.south(),
+            Direction::SouthWest => self.south_west(),
+            Direction::West => self.west(),
+            Direction::NorthWest => self.north_west(),
         }
     }
 }
@@ -287,6 +274,26 @@ impl SubAssign<&Point> for Point {
     fn sub_assign(&mut self, rhs: &Self) {
         self.y -= rhs.y;
         self.x -= rhs.x;
+    }
+}
+
+impl Mul for Point {
+    type Output = Self;
+    fn mul(self, rhs: Self) -> Self::Output {
+        Self {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+        }
+    }
+}
+
+impl Mul<&Point> for Point {
+    type Output = Self;
+    fn mul(self, rhs: &Self) -> Self::Output {
+        Self {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+        }
     }
 }
 
