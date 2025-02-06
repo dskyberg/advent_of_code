@@ -47,7 +47,7 @@ pub struct Warehouse {
 impl Warehouse {
     pub fn step(&mut self, p: &Point, d: Direction) {
         // Get the new point after moving
-        let new_p = p.move_to(d);
+        let new_p = p.neighbor(d);
 
         // If there is a wall in the way, return
         if self.matrix.get_unsafe(&new_p) == Element::Wall {

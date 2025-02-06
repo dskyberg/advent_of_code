@@ -62,12 +62,12 @@ impl Warehouse {
         while let Some(point) = queue.pop_front() {
             if !seen.contains(&point) {
                 seen.push(point);
-                let new_p = point.move_to(dir);
+                let new_p = point.neighbor(dir);
 
                 match self.matrix.get_unsafe(&new_p) {
                     Element::Wall => return,
-                    Element::LBox => queue.extend([new_p, new_p.move_to(Direction::East)]),
-                    Element::RBox => queue.extend([new_p.move_to(Direction::West), new_p]),
+                    Element::LBox => queue.extend([new_p, new_p.neighbor(Direction::East)]),
+                    Element::RBox => queue.extend([new_p.neighbor(Direction::West), new_p]),
                     Element::Empty => continue,
                     _ => unreachable!("Invalid element"),
                 }
@@ -83,7 +83,7 @@ impl Warehouse {
         }
 
         for point in seen {
-            let new_p = point.move_to(dir);
+            let new_p = point.neighbor(dir);
             self.matrix.swap_unsafe(&point, &new_p);
         }
     }
@@ -91,7 +91,7 @@ impl Warehouse {
     fn move_robot(&mut self) {
         for dir in self.moves.clone() {
             let robot = self.find_robot();
-            let new_p = robot.move_to(dir);
+            let new_p = robot.neighbor(dir);
             match self.matrix.get_unsafe(&new_p) {
                 Element::Wall => continue,
                 Element::LBox | Element::RBox => self.move_boxes(robot, dir),
