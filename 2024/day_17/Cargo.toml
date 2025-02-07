@@ -1,0 +1,9 @@
+[package]
+name = "day_17"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.95"
+aoc_utils = { version = "0.2024.0", path = "../../aoc_utils" }
+thiserror = "2.0.11"
