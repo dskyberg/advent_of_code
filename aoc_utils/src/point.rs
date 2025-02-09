@@ -236,6 +236,7 @@ impl AddAssign for Point {
         self.x += rhs.x;
     }
 }
+
 impl AddAssign<&Point> for Point {
     fn add_assign(&mut self, rhs: &Point) {
         self.y += rhs.y;
@@ -286,13 +287,92 @@ impl Mul for Point {
         }
     }
 }
-
 impl Mul<&Point> for Point {
     type Output = Self;
     fn mul(self, rhs: &Self) -> Self::Output {
         Self {
             x: self.x * rhs.x,
             y: self.y * rhs.y,
+        }
+    }
+}
+
+impl Mul<i8> for Point {
+    type Output = Self;
+    fn mul(self, rhs: i8) -> Self::Output {
+        Self {
+            x: self.x * rhs as isize,
+            y: self.y * rhs as isize,
+        }
+    }
+}
+
+impl Mul<u8> for Point {
+    type Output = Self;
+    fn mul(self, rhs: u8) -> Self::Output {
+        Self {
+            x: self.x * rhs as isize,
+            y: self.y * rhs as isize,
+        }
+    }
+}
+
+impl Mul<i32> for Point {
+    type Output = Self;
+    fn mul(self, rhs: i32) -> Self::Output {
+        Self {
+            x: self.x * rhs as isize,
+            y: self.y * rhs as isize,
+        }
+    }
+}
+
+impl Mul<u32> for Point {
+    type Output = Self;
+    fn mul(self, rhs: u32) -> Self::Output {
+        Self {
+            x: self.x * rhs as isize,
+            y: self.y * rhs as isize,
+        }
+    }
+}
+
+impl Mul<i64> for Point {
+    type Output = Self;
+    fn mul(self, rhs: i64) -> Self::Output {
+        Self {
+            x: self.x * rhs as isize,
+            y: self.y * rhs as isize,
+        }
+    }
+}
+
+impl Mul<u64> for Point {
+    type Output = Self;
+    fn mul(self, rhs: u64) -> Self::Output {
+        Self {
+            x: self.x * rhs as isize,
+            y: self.y * rhs as isize,
+        }
+    }
+}
+
+impl Mul<isize> for Point {
+    type Output = Self;
+    fn mul(self, rhs: isize) -> Self::Output {
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
+    }
+}
+
+impl Mul<usize> for Point {
+    type Output = Self;
+    fn mul(self, rhs: usize) -> Self::Output {
+        Self {
+            x: self.x * rhs as isize,
+            y: self.y * rhs as isize,
         }
     }
 }
