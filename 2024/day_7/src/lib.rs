@@ -1,6 +1,6 @@
 use anyhow::Result;
-use aoc_utils::nom::{
-    IResult,
+use nom::{
+    IResult, Parser,
     bytes::complete::tag,
     character::complete::{space1, u64},
     combinator::map_res,
@@ -75,7 +75,8 @@ fn parse_equation(input: &str) -> IResult<&str, Equation> {
     map_res(
         separated_pair(u64, tag(": "), separated_list1(space1, u64)),
         Equation::try_from,
-    )(input)
+    )
+    .parse(input)
 }
 
 pub fn read_data(data: &'static str) -> Result<Vec<Equation>> {

@@ -21,7 +21,7 @@ fn main() -> Result<()> {
                 let mut factor = 0;
                 loop {
                     factor += 1;
-                    let p = *a1 + distance.mul(factor);
+                    let p = *a1 + distance * factor;
                     if board.valid_point(&p) {
                         antinodes.insert(p);
                     } else {
@@ -31,7 +31,7 @@ fn main() -> Result<()> {
                 factor = 0;
                 loop {
                     factor += 1;
-                    let p = *a2 - distance.mul(factor);
+                    let p = *a2 - distance * factor;
                     if board.valid_point(&p) {
                         antinodes.insert(p);
                     } else {

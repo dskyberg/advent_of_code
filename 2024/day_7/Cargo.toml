@@ -6,4 +6,5 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.95"
 aoc_utils = { version = "0.2024.0", path = "../../aoc_utils" }
+nom = "8.0.0"
 thiserror = "2.0.11"

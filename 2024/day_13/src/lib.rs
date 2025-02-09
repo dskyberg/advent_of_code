@@ -2,13 +2,13 @@ use anyhow::Result;
 
 use aoc_utils::Point;
 
-use aoc_utils::nom::{
-    IResult,
+use nom::{
+    IResult, Parser,
     bytes::complete::tag,
     character::complete::{i64, newline, one_of},
     combinator::map_res,
     multi::separated_list1,
-    sequence::{preceded, separated_pair, terminated, tuple},
+    sequence::{preceded, separated_pair, terminated},
 };
 
 pub const A_COST: isize = 3;
@@ -92,17 +92,18 @@ pub fn solve(a: Point, b: Point, prize: Point) -> Option<isize> {
 }
 
 fn tagged_i64(input: &str) -> IResult<&str, i64> {
-    preceded(one_of("XY"), i64)(input)
+    preceded(one_of("XY"), i64).parse(input)
 }
 fn parse_xy(input: &str) -> IResult<&str, (i64, i64)> {
-    separated_pair(tagged_i64, tag(", "), tagged_i64)(input)
+    separated_pair(tagged_i64, tag(", "), tagged_i64).parse(input)
 }
 
 fn parse_button(input: &str) -> IResult<&str, (i64, i64)> {
     terminated(
-        preceded(tuple((tag("Button "), one_of("AB"), tag(": "))), parse_xy),
+        preceded((tag("Button "), one_of("AB"), tag(": ")), parse_xy),
         newline,
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_prize(input: &str) -> IResult<&str, (i64, i64)> {
@@ -116,17 +117,15 @@ fn parse_prize(input: &str) -> IResult<&str, (i64, i64)> {
             ),
         ),
         newline,
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_machine(input: &str) -> IResult<&str, Machine> {
-    map_res(
-        tuple((parse_button, parse_button, parse_prize)),
-        Machine::try_from,
-    )(input)
+    map_res((parse_button, parse_button, parse_prize), Machine::try_from).parse(input)
 }
 fn parse_machines(input: &str) -> IResult<&str, Vec<Machine>> {
-    separated_list1(newline, parse_machine)(input)
+    separated_list1(newline, parse_machine).parse(input)
 }
 
 pub fn read_data(input: &'static str) -> Result<Vec<Machine>> {

@@ -1,11 +1,14 @@
 use std::collections::HashSet;
 
 use anyhow::Result;
-use bytes::complete::tag;
-use character::complete::{i64, newline, one_of, space1};
-use combinator::map;
-use multi::separated_list1;
-use sequence::{preceded, separated_pair, tuple};
+use nom::{
+    IResult, Parser,
+    bytes::complete::tag,
+    character::complete::{i64, newline, one_of, space1},
+    combinator::map,
+    multi::separated_list1,
+    sequence::{preceded, separated_pair},
+};
 use thiserror::Error;
 
 use aoc_utils::*;
@@ -45,7 +48,7 @@ pub struct Lobby {
 impl Lobby {
     pub fn new(input: &'static str, max_row: isize, max_col: isize) -> Result<Self> {
         let max = Point::from((max_col, max_row));
-        let (_, robots) = separated_list1(newline, robot)(input)?;
+        let (_, robots) = separated_list1(newline, robot).parse(input)?;
         Ok(Lobby { robots, max })
     }
 
@@ -78,17 +81,18 @@ impl std::fmt::Display for Lobby {
 }
 
 fn point(input: &str) -> IResult<&str, Point> {
-    map(separated_pair(i64, tag(","), i64), Point::from)(input)
+    map(separated_pair(i64, tag(","), i64), Point::from).parse(input)
 }
 fn named_point(input: &str) -> IResult<&str, Point> {
-    preceded(tuple((one_of("pv"), tag("="))), point)(input)
+    preceded((one_of("pv"), tag("=")), point).parse(input)
 }
 
 fn robot(input: &str) -> IResult<&str, Robot> {
     map(
         separated_pair(named_point, space1, named_point),
         Robot::from,
-    )(input)
+    )
+    .parse(input)
 }
 
 pub static INPUT: &str = r#"p=1,65 v=-5,-84
