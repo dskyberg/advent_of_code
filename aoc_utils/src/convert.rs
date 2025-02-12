@@ -1,3 +1,4 @@
+//! Text to number conversion methods
 use anyhow::Result;
 use std::str::pattern::Pattern;
 use thiserror::Error;
@@ -12,42 +13,113 @@ pub enum ConvertError {
     TryFromFailed,
 }
 
-/// Convert from char to numeric type T (such as u8, u32, etc).
-/// Returns an error if the char cannot be converted to a number
+/// Convert from char to scalar type T (such as u8, u32, i32 etc).
+/// Returns an error if the char cannot be converted to a number.
+///
+/// Example:
+///
+/// ```
+/// use aoc_utils::*;
+///
+/// assert_eq!(c_to_num::<u32>('0').unwrap(), 0u32);
+/// ```
+///
+/// # Errors
+/// `ConvertError::Failed` is returned on failure
+///
 pub fn c_to_num<T: std::convert::From<u8>>(c: char) -> Result<T> {
     let result = c.to_digit(10).ok_or(ConvertError::Failed(c))? as u8;
     Ok(result.into())
 }
 
-/// Convert a single string to digits
-/// "123" becomes [1,2,3]
-/// This method is unsafe, and will panic if character is not a digit.
+/// Convert a string of digits to a `Vec<T>` (such as `Vec<u8>`, `Vec<u32>`, `Vec<i32>`, etc.).
+///
+/// # Example
+/// ```
+/// use aoc_utils::*;
+///
+/// assert_eq!(line_to_digits::<u32>("123").unwrap(), vec![1,2,3])
+/// ```
+///
+/// # Errors
+/// `ConvertError::Failed` is returned on failure
 pub fn line_to_digits<T: std::convert::From<u8>>(line: &str) -> Result<Vec<T>> {
     line.chars().map(c_to_num).collect()
 }
 
-/// Convert a single string to numbers
-/// "123" becomes [1,2,3]
-/// This method is unsafe, and will panic if character is not a digit.
+/// Convert a string of digits to a `Vec<T>` (such as `Vec<u8>`, `Vec<u32>`, `Vec<i32>`, etc.).
+/// without error checking.
+///
+/// # Example
+/// ```
+/// use aoc_utils::*;
+///
+/// assert_eq!(unsafe_line_to_digits::<u32>("123"), vec![1,2,3])
+/// ```
+///
+/// # Panics
+///
+/// Panics if any character in the string is not a digit.
 pub fn unsafe_line_to_digits<T: std::convert::From<u8>>(line: &str) -> Vec<T> {
     line.chars()
         .map(|c| (c.to_digit(10).unwrap() as u8).into())
         .collect()
 }
 
-/// Convert `\n` delimited lines to digits
-/// "123\n456" becomes [[1, 2, 3], [4, 5, 6]]
+/// Convert a string with multiple lines (delimited by `\n`) to `Vec<Vec<T>>`.
+///
+/// # Example
+///
+/// ```
+/// use aoc_utils::*;
+///
+/// let input = r#"123
+/// 456
+/// 789"#;
+///
+/// assert_eq!(data_to_digits::<u32>(input).unwrap(), vec![vec![1,2,3], vec![4,5,6], vec![7,8,9]]);
+/// ```
+///
+/// # Errors
+/// `ConvertError::Failed` is returned on failure
 pub fn data_to_digits<T: std::convert::From<u8>>(data: &str) -> Result<Vec<Vec<T>>> {
     data.lines().map(line_to_digits).collect()
 }
 
-/// Convert `\n` delimited lines to digits
-/// "123\n456" becomes [[1, 2, 3], [4, 5, 6]]
+/// Convert a string with multiple lines (delimited by `\n`) to `Vec<Vec<T>>`,
+/// without error checking.
+///
+/// # Example
+///
+/// ```
+/// use aoc_utils::*;
+///
+/// let input = r#"123
+/// 456
+/// 789"#;
+///
+/// assert_eq!(unsafe_data_to_digits::<u32>(input), vec![vec![1,2,3], vec![4,5,6], vec![7,8,9]]);
+/// ```
+/// # Panics
+///
+/// Panics if any character in the string is not a digit.
 pub fn unsafe_data_to_digits<T: std::convert::From<u8>>(data: &str) -> Vec<Vec<T>> {
     data.lines().map(unsafe_line_to_digits).collect()
 }
 
 /// Splits a line on `pat` and parses each into T
+///
+/// # Example
+///
+/// ```
+/// use aoc_utils::*;
+///
+/// let line = "  1    2 3";
+/// assert_eq!(vec![1, 2, 3], line_to_numbers::<u32>(line, ' ').unwrap());
+/// ```
+///
+/// # Errors
+/// `ConvertError::NumberFromStr` if parsing failes
 pub fn line_to_numbers<T: std::str::FromStr>(line: &str, pat: impl Pattern) -> Result<Vec<T>> {
     line.trim()
         .split(pat)
@@ -62,18 +134,24 @@ pub fn line_to_numbers<T: std::str::FromStr>(line: &str, pat: impl Pattern) -> R
         .collect()
 }
 
-/// Convert a single string to ASCII bytes
-/// "123" becomes [49, 50, 51]
-pub fn line_to_ascii_bytes(line: &str) -> Vec<u8> {
-    line.as_bytes().to_vec()
-}
-
-/// Convert `\n` delimited lines to ascii bytes.
-/// "abc\n123" becomes [[97, 98, 99], [49, 50, 51]]
-pub fn data_to_ascii_bytes(data: &str) -> Vec<Vec<u8>> {
-    data.lines().map(line_to_ascii_bytes).collect()
-}
-
+/// Converts random data to a `Vec<Vec<T>>`.
+///
+/// # Example
+///
+/// ```
+/// use aoc_utils::*;
+///
+/// let input = r#"######
+/// #..#.#
+/// #######"#;
+///
+/// assert_eq!(data_to_grid::<u8>(input).unwrap(), vec![
+///  vec![b'#',b'#',b'#',b'#',b'#',b'#'],
+///  vec![b'#',b'.',b'.',b'#',b'.',b'#'],
+///  vec![b'#',b'#',b'#',b'#',b'#',b'#']]);
+/// ```
+/// # Errors
+/// `ConvertError::TryFromFailed` is returned if any value cannot be parsed
 pub fn data_to_grid<T: std::convert::TryFrom<char>>(data: &str) -> Result<Vec<Vec<T>>> {
     data.lines()
         .map(|c| {
@@ -86,16 +164,10 @@ pub fn data_to_grid<T: std::convert::TryFrom<char>>(data: &str) -> Result<Vec<Ve
         .collect::<Result<Vec<Vec<T>>, _>>()
         .map_err(|_| ConvertError::TryFromFailed.into())
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_data_to_ascii() {
-        let input = "abc\n123";
-        let bytes = data_to_ascii_bytes(input);
-        println!("{:?}", bytes);
-    }
 
     #[test]
     fn test_digits() {

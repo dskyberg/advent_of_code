@@ -4,8 +4,11 @@ use thiserror::Error;
 pub enum DirectionError {
     #[error("Error parsing Direction")]
     FromStr,
+    #[error("Bad input on TryFrom")]
+    TryFrom,
 }
 
+/// All cardinal and ordinal compass points
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Default, Ord, PartialOrd)]
 pub enum Direction {
     #[default]
@@ -19,12 +22,19 @@ pub enum Direction {
     NorthWest,
 }
 
+/// Convert a Direction into a u8.
+///
+/// I don't know if this actually has value, since you can always do `dir as u8`.
 impl From<Direction> for u8 {
     fn from(value: Direction) -> Self {
         value as u8
     }
 }
 
+/// Convert a `u8` inro a `Dierection`
+///
+/// # Panics
+/// Panics if  `value > 7`.
 impl From<u8> for Direction {
     fn from(value: u8) -> Self {
         match value {

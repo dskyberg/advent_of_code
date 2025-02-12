@@ -1,3 +1,5 @@
+//! Methods for determining the number of digits in an integer
+
 pub trait NumDigits {
     fn num_digits(&self) -> usize; //𝑓(𝑛,base)=logbase(𝑛)+1
 }

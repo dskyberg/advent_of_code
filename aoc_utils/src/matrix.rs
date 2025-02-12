@@ -1,3 +1,4 @@
+//! Create 2D matrix of any scalar type (u8, u32, etc.)
 use anyhow::Result;
 use std::fmt::Display;
 use std::ops::{Deref, DerefMut};
@@ -25,6 +26,7 @@ pub struct Matrix<T: ItemTrait> {
     pub height: usize,
 }
 
+/// Returns the valid neighbors for the given point.
 impl<T: ItemTrait> Matrix<T> {
     pub fn neighbors(&self, p: &Point) -> Vec<Point> {
         p.neighbors()
@@ -33,6 +35,7 @@ impl<T: ItemTrait> Matrix<T> {
             .collect()
     }
 
+    /// Tests to ensure the point is within the matrix space.
     #[inline]
     pub fn valid_point(&self, point: &Point) -> bool {
         point.y >= 0
@@ -41,6 +44,7 @@ impl<T: ItemTrait> Matrix<T> {
             && point.x < self.width as isize
     }
 
+    /// Tests whether the point lies on a boundary of the matrix
     #[inline]
     pub fn is_edge(&self, p: &Point) -> bool {
         (p.x == 0 || p.x == self.width as isize - 1)
@@ -48,6 +52,9 @@ impl<T: ItemTrait> Matrix<T> {
     }
 
     /// Gets a value at position `Point`. Returns Err if the position is not valid.
+    ///
+    /// # Errors
+    /// `MatrixError::OutOfRange` if the point is not valid
     #[inline]
     pub fn get(&self, point: &Point) -> Result<T> {
         let x = *self
@@ -58,7 +65,10 @@ impl<T: ItemTrait> Matrix<T> {
         Ok(x)
     }
 
-    /// Gets a value at position `Point`. Panics if the position is not valid.
+    /// Gets a value at position `Point`.
+    ///
+    /// # Panics
+    /// Panics if the position is not valid.
     #[inline]
     pub fn get_unsafe(&self, point: &Point) -> T {
         *self
@@ -69,6 +79,9 @@ impl<T: ItemTrait> Matrix<T> {
     }
 
     /// Sets a value at position `Point`. Returns Err if the position is not valid.
+    ///
+    /// # Errors
+    /// `MatrixError::OutOfRange` if the point is not valid
     #[inline]
     pub fn set(&mut self, point: &Point, t: T) -> Result<()> {
         match self.valid_point(point) {
@@ -81,6 +94,9 @@ impl<T: ItemTrait> Matrix<T> {
     }
 
     /// Sets a value at position `Point`. Panics if the position is not valid.
+    ///
+    /// # Panics
+    /// Panics if the point is not valid
     #[inline]
     pub fn set_unsafe(&mut self, point: &Point, t: T) {
         self[point.y as usize][point.x as usize] = t;
@@ -96,10 +112,10 @@ impl<T: ItemTrait> Matrix<T> {
 
     #[inline]
     /// Calculates the (x,y) point offset for the index in the form of:
+    /// - y: index / self.width
+    /// - x: index % self.width
     ///
-    /// y: index / self.width
-    ///
-    /// x: index % self.width
+    /// This is the reciprocal of [Matrix::iter()]
     pub fn index2point(&self, index: usize) -> Option<Point> {
         if index >= self.width * self.height {
             return None;
@@ -110,6 +126,7 @@ impl<T: ItemTrait> Matrix<T> {
         })
     }
 
+    /// Find all points in the matrix containing `input`
     pub fn find(&self, input: &T) -> Vec<Point> {
         self.iter()
             .filter(|(_, t)| t == input)
@@ -117,14 +134,15 @@ impl<T: ItemTrait> Matrix<T> {
             .collect()
     }
 
+    /// Find the first point containing `input`, if it exists.
     pub fn find_one(&self, input: &T) -> Option<Point> {
-        let results: Vec<Point> = self.find(input);
-        match results.is_empty() {
-            true => None,
-            false => Some(results[0]),
-        }
+        self.find(input).first().cloned()
     }
 
+    /// Swap the values of two points on the mtrix
+    ///
+    /// # Errors
+    /// MatrixError::OutOfRange if either point is invalid.
     pub fn swap(&mut self, lhs: &Point, rhs: &Point) -> Result<()> {
         if !self.valid_point(lhs) {
             return Err(MatrixError::OutOfRange(lhs.x, lhs.y).into());
@@ -136,6 +154,10 @@ impl<T: ItemTrait> Matrix<T> {
         Ok(())
     }
 
+    /// Swap the values of two points on the mtrix
+    ///
+    /// # Panics
+    /// Panics if either point is invalid
     pub fn swap_unsafe(&mut self, lhs: &Point, rhs: &Point) {
         let hold = self.get_unsafe(lhs);
         self.set_unsafe(lhs, self.get_unsafe(rhs));

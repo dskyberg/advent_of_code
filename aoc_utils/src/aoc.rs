@@ -1,6 +1,25 @@
+//! Package timing and results for a part.
 use std::fmt::Display;
 use std::time::Instant;
 
+/// Instantiate in the main function for a part
+///
+/// # Example
+///
+/// ```
+/// use aoc_utils::Aoc;
+///
+/// fn solve() -> usize {
+///     0
+/// }
+///
+/// fn main() {
+///     let mut aoc = Aoc::part1();
+///     let result = solve();
+///     aoc.result(result);
+///     println!("{}", aoc);
+/// }
+/// ```
 pub struct Aoc {
     part: u32,
     pub now: Instant,
