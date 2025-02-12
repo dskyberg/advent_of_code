@@ -6,7 +6,7 @@ use day_10::*;
 
 fn walk_path(stop: u8, from: &Point, max: u8, maxes: &mut HashSet<Point>, dag: &DAG) -> Result<()> {
     for node in (*dag).get(&stop).ok_or(Day10Error::IncompleteDAG)? {
-        if node.touches(from, false) {
+        if node.touches(from) {
             if stop == max {
                 maxes.insert(*node);
             } else {

@@ -11,7 +11,7 @@ fn main() -> Result<()> {
     let goal = Point::from((70, 70));
 
     let successors = |p: &Point| {
-        p.neighbors_hv()
+        p.neighbors()
             .into_iter()
             .filter(|p| matrix.valid_point(p) && matrix.get_unsafe(p) != b'#')
             .map(|p| (p, 1))

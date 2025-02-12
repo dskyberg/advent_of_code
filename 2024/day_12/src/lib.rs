@@ -38,7 +38,7 @@ pub fn bfs_region(
     region.insert(*plot);
     for neighbor in plot
         // For this puzzle, we only look at horizontal and vertical neighbors
-        .neighbors_hv()
+        .neighbors()
         .iter()
         .filter(|&p| plots.contains_key(p))
     {

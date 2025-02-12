@@ -15,7 +15,7 @@ fn main() -> Result<()> {
     let goal = Point::from((dim - 1, dim - 1));
 
     let successors = |p: &Point| {
-        p.neighbors_hv()
+        p.neighbors()
             .into_iter()
             .filter(|p| matrix.valid_point(p) && matrix.get_unsafe(p) != b'#')
             .map(|p| (p, 1))
@@ -28,7 +28,7 @@ fn main() -> Result<()> {
             println!("First is {}", point);
         }
     }
-
+    aoc.result(result);
     println!("{}", aoc);
     Ok(())
 }

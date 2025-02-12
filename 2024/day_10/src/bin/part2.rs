@@ -6,7 +6,7 @@ use day_10::*;
 fn walk_path(stop: u8, from: &Point, max: u8, dag: &DAG) -> Result<u32> {
     let mut result = 0;
     for node in (*dag).get(&stop).ok_or(Day10Error::IncompleteDAG)? {
-        if node.touches(from, false) {
+        if node.touches(from) {
             if stop == max {
                 result += 1;
             } else {
