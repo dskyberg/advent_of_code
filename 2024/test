@@ -1,0 +1,16 @@
+# Verify that changes to the aoc_utils lib hasn't broken any days
+for entry in *; do
+    if [[ "$entry" = "day_14" ]]; then
+        continue
+    fi
+    if [[ -d "$entry" ]]; then
+        arrIN=(${entry//_/ })
+        day="${arrIN[1]}"
+        pushd $entry
+        echo "Day $day" >> ../output
+        cargo run --bin part1 >> ../output
+        cargo run --bin part2 >> ../output
+        # aoc_answers -y 2024 -d $day >> ../output
+        popd
+    fi;
+done
