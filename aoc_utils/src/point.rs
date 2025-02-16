@@ -37,13 +37,13 @@ impl Point {
     #[inline]
     /// Absolute distance between rows
     pub fn vertical_distance(&self, other: &Self) -> isize {
-        self.y.max(other.y) - self.y.min(other.y)
+        self.y.abs_diff(other.y) as isize
     }
 
     #[inline]
     /// Absolute distance between cols
     pub fn horizontal_distance(&self, other: &Self) -> isize {
-        self.x.max(other.x) - self.x.min(other.x)
+        self.x.abs_diff(other.x) as isize
     }
 
     #[inline]
@@ -110,6 +110,16 @@ impl Point {
         CARDINAL_NEIGHBORS.iter().map(|dir| *self + *dir).collect()
     }
 
+    pub fn neighbors_with_dir(&self) -> Vec<(Point, Direction)> {
+        [
+            (self.north(), Direction::North),
+            (self.east(), Direction::East),
+            (self.south(), Direction::South),
+            (self.west(), Direction::West),
+        ]
+        .to_vec()
+    }
+
     /// Returns the collection of cardinal and ordinal neighbors for this point.
     pub fn neighbors_ord(&self) -> Vec<Point> {
         let mut result = self.neighbors();
@@ -120,6 +130,17 @@ impl Point {
                 .collect::<Vec<_>>(),
         );
         result
+    }
+
+    pub fn neighbors_ord_with_dir(&self) -> Vec<(Point, Direction)> {
+        let mut neighbors = self.neighbors_with_dir();
+        neighbors.extend(&[
+            (self.north(), Direction::NorthEast),
+            (self.east(), Direction::SouthEast),
+            (self.south(), Direction::SouthWest),
+            (self.west(), Direction::NorthWest),
+        ]);
+        neighbors
     }
 
     /// Returns the Euclidian remander between rhs and self.
@@ -250,6 +271,16 @@ impl From<(i32, i32)> for Point {
 impl Display for Point {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "[{},{}]", self.x, self.y)
+    }
+}
+
+impl Add<(isize, isize)> for Point {
+    type Output = Self;
+    fn add(self, (x, y): (isize, isize)) -> Self::Output {
+        Self {
+            y: self.y + y,
+            x: self.x + x,
+        }
     }
 }
 
