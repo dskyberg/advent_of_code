@@ -5,7 +5,7 @@ use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 use thiserror::Error;
 
-use crate::{Point, data_to_grid};
+use crate::{Direction, Point, data_to_grid};
 
 pub trait ItemTrait = TryFrom<char> + Copy + Display + PartialEq;
 
@@ -32,6 +32,13 @@ impl<T: ItemTrait> Matrix<T> {
         p.neighbors()
             .into_iter()
             .filter(|point| self.valid_point(point))
+            .collect()
+    }
+
+    pub fn neighbors_with_dir(&self, p: &Point) -> Vec<(Point, Direction)> {
+        p.neighbors_with_dir()
+            .into_iter()
+            .filter(|(point, _)| self.valid_point(point))
             .collect()
     }
 
@@ -107,6 +114,13 @@ impl<T: ItemTrait> Matrix<T> {
         MatrixIterator {
             matrix: self,
             index: 0,
+        }
+    }
+
+    pub fn compare(&self, point: &Point, t: T) -> Option<bool> {
+        match self.valid_point(point) {
+            false => None,
+            true => Some(self.get_unsafe(point) == t),
         }
     }
 
